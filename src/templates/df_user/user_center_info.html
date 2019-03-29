@@ -1,0 +1,44 @@
+{% extends 'df_user/base.html' %}
+
+{%block head%}{%endblock head%}
+
+{% block body %}
+
+	<div class="main_con clearfix">
+		<div class="left_menu_con clearfix">
+			<h3>My Account</h3>
+			<ul>
+				<li><a href="/user/info/" class="active">· My Personal Info</a></li>
+				<li><a href="/user/order/">· My Orders</a></li>
+				<li><a href="/user/site/">· Address:</a></li>
+			</ul>
+		</div>
+		<div class="right_content clearfix">
+            <div class="info_con clearfix">
+				<h3 class="common_title2">Basic Info</h3>
+                    <ul class="user_info_list">
+                        <li><span>Name：</span>{{ user_name }}</li>
+                        <li><span>Email：</span>{{ user_email }}</li>
+                        <li><span>Address：</span>{{ user_address }}</li>
+                    </ul>
+            </div>
+				
+            <h3 class="common_title2">Recently Viewed</h3>
+            <div class="has_view_list">
+                <ul class="goods_type_list clearfix">
+                    {% for goods in goods_list %}
+                        <li>
+                            <a href="/{{goods.id}}/"><img src="/upload/{{goods.gpic}}/"></a>
+                            <h4><a href="/{{goods.id}}/">{{goods.gtitle}}</a></h4>
+                            <div class="operate">
+                                <span class="prize">{{goods.gprice}}</span>
+                                <span class="unit">{{goods.gprice}}/{{goods.gunit}}</span>
+                                <a href="#" class="add_goods" title="Add to my cart"></a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+	</div>
+{% endblock body %}

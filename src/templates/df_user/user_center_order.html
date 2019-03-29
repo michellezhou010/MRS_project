@@ -1,0 +1,82 @@
+{% extends 'df_user/base.html' %}
+
+{%block head%}{%endblock head%}
+
+{% block body %}
+
+	<div class="main_con clearfix">
+		<div class="left_menu_con clearfix">
+			<h3>用户中心</h3>
+			<ul>
+				<li><a href="/user/info/">· My Personal Info</a></li>
+				<li><a href="/user/order/" class="active">· My Orders</a></li>
+				<li><a href="/user/site/">· Address:</a></li></ul>
+		</div>
+		<div class="right_content clearfix">
+				<h3 class="common_title2">My Orders</h3>
+				<ul class="order_list_th w978 clearfix">
+					<li class="col01">2016-8-21 17:36:24</li>
+					<li class="col02">Order No：56872934</li>
+					<li class="col02 stress">In Process</li>		
+				</ul>
+
+				<table class="order_list_table w980">
+					<tbody>
+						<tr>
+							<td width="55%">
+								<ul class="order_goods_list clearfix">					
+									<li class="col01"><img src="/static/images/goods02.jpg"></li>
+									<li class="col02">ADDDDDD<em>12.11 CAD/500g</em></li>	
+									<li class="col03">1</li>
+									<li class="col04">12.11 CAD</li>	
+								</ul>
+								<ul class="order_goods_list clearfix">					
+									<li class="col01"><img src="/static/images/goods02.jpg"></li>
+									<li class="col02">OOOOOO<em>1.80CAD/5g</em></li>	
+									<li class="col03">10</li>
+									<li class="col04">18 CAD</li>	
+								</ul>
+							</td>
+							<td width="15%">30.11 CAD</td>
+							<td width="15%">In Process</td>
+							<td width="15%"><a href="#" class="oper_btn">Pay Now</a></td>
+						</tr>
+					</tbody>
+				</table>
+				
+				<ul class="order_list_th w978 clearfix">
+					<li class="col01">2016-8-21 17:36:24</li>
+					<li class="col02">Order No：56872934</li>
+					<li class="col02 stress">Paid</li>			
+				</ul>
+				<table class="order_list_table w980">
+					<tbody>
+						<tr>
+							<td width="55%">
+								<ul class="order_goods_list clearfix">					
+									<li class="col01"><img src="/static/images/goods02.jpg"></li>
+									<li class="col02">Blue pillow cover<em>54 CAD/500g</em></li>	
+									<li class="col03">1</li>
+									<li class="col04">54 CAD</li>	
+								</ul>
+							</td>
+							<td width="15%">54 CAD</td>
+							<td width="15%">Paid</td>
+							<td width="15%"><a href="#" class="oper_btn">Check Status</a></td>
+						</tr>
+					</tbody>
+				</table>
+
+				<div class="pagenation">
+					<a href="#"> previous</a>
+					<a href="#" class="active">1</a>
+					<a href="#">2</a>
+					<a href="#">3</a>
+					<a href="#">4</a>
+					<a href="#">5</a>
+					<a href="#">next></a>
+				</div>
+		</div>
+	</div>
+
+{% endblock body %}

@@ -1,0 +1,51 @@
+{% extends 'df_user/base.html' %}
+
+{%block head%}{%endblock head%}
+
+{% block body %}
+
+	<div class="main_con clearfix">
+		<div class="left_menu_con clearfix">
+			<h3>用户中心</h3>
+			<ul>
+				<li><a href="/user/info/">· My account</a></li>
+				<li><a href="/user/order/">· My Orders</a></li>
+				<li><a href="/user/site/" class="active">· Address</a></li>
+			</ul>
+		</div>
+		<div class="right_content clearfix">
+				<h3 class="common_title2">Address</h3>
+				<div class="site_con">
+					<dl>
+						<dt>Your Address：</dt>
+						<dd>{{ user.uaddress }}&nbsp;&nbsp;({{ user.ushou }})&nbsp;&nbsp;{{user.uphone}}</dd>
+					</dl>					
+				</div>
+				<h3 class="common_title2">Edit</h3>
+				<div class="site_con">
+					<form action="/user/site/" method="post">
+                        {% csrf_token %}
+						<div class="form_group">
+							<label>Name：</label>
+							<input type="text" name="ushou" value="{{ user.ushou }}">
+						</div>
+						<div class="form_group form_group2">
+							<label>Detail：</label>
+							<textarea class="site_area" name="uaddress">{{user.uaddress}}</textarea>
+						</div>
+						<div class="form_group">
+							<label>Postcode：</label>
+							<input type="text" name="uyoubian" value="{{ user.uyoubian }}">
+						</div>
+						<div class="form_group">
+							<label>Mobile：</label>
+							<input type="text" name="uphone" value="{{ user.uphone }}">
+						</div>
+
+						<input type="submit" name="" value="Submit" class="info_submit">
+					</form>
+				</div>
+		</div>
+	</div>
+	
+{% endblock body %}

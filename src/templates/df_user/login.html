@@ -1,0 +1,75 @@
+{% extends 'df_user/base_foot.html' %}
+
+{% block head %}
+  <script>
+    $(function(){
+      name_error=false;
+      pwd_error=false;
+
+      if ({{ error_name }} == 1){
+          $('.user_error').html('Wrong Name').show();
+        }
+
+      if ({{ error_pwd }} == 1){
+          $('.pwd_error').html('Incorrect Password').show();
+        }
+
+      $('.name_input').blur(function () {
+          if($('.name_input').val().length == 0){
+              $('.user_error').html('Please input your name!').show();
+              name_error=false;
+          }else {
+              $('.user_error').hide();
+              name_error=true;
+          }
+      });
+
+      $('.pass_input').blur(function () {
+         if($('.pass_input').val().length == 0){
+             $('.pwd_error').html('Please input your password!').show();
+             pwd_error=false;
+         }else {
+             $('.user_error').hide();
+             name_error=true;
+         }
+      });
+
+    })
+  </script>
+{% endblock head %}
+
+{% block body %}
+
+	<div class="login_top clearfix">
+		<a href="/" class="login_logo"><img src="/static/images/logo02.png"></a>
+	</div>
+
+	<div class="login_form_bg">
+		<div class="login_form_wrap clearfix">
+			<div class="login_banner fl"></div>
+			<div class="slogan fl">In Processing Always</div>
+			<div class="login_form fr">
+				<div class="login_title clearfix">
+					<h1>Login</h1>
+					<a href="/user/register/">One-step Register </a>
+				</div>
+				<div class="form_input">
+					<form action="/user/login_handle/" method="post">
+                        {% csrf_token %}
+						<input type="text" name="username" class="name_input" value="{{ uname }}" placeholder="please input your name">
+						<div class="user_error">something wrong</div>
+						<input type="password" name="pwd" class="pass_input" value="{{ upwd }}" placeholder="please input your password">
+						<div class="pwd_error">something wrong</div>
+						<div class="more_input clearfix">
+                            <input type="checkbox" name="jizhu" value='1' checked="checked">
+							<label>Remember Me!</label>
+							<a href="#">Forgot password</a>
+						</div>
+						<input type="submit" name="" value="Log in" class="input_submit">
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock body %}

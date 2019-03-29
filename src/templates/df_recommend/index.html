@@ -1,0 +1,251 @@
+{% extends 'df_user/base_foot.html' %}
+<!--{%load static from staticfiles%}-->
+{%block head%}
+	<script type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
+	<!--<script type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>-->
+	<script type="text/javascript" src="/static/js/slide.js"></script>
+    {% if request.session.user_name|default:'' != '' %}
+	<script>
+        $(function () {
+           f();
+        });
+        function f() {  //进入页面时刷新购物车数量  规定此时商品id和数量都为0
+             $.get('/cart/add0_0/', function (data) {
+                $('#show_count').text(data.count);
+            });
+        }
+    </script>
+    {% endif %}
+{%endblock head%}
+
+{% block body %}
+	<div class="header_con">
+		<div class="header">
+			<div class="welcome fl">Welcome to MRS Recommendation!</div>
+			<div class="fr">
+				{% if request.session.user_name|default:'' != '' %}		
+                    <div class="login_btn fl">
+                        <a>Welcome:</a>
+                        <a>{{request.session.user_name}}</a>
+                        <span>|</span>
+                        <a href="/user/logout/">Sign Out</a>
+                    </div>
+                {% else %}
+                    <div class="login_btn fl">
+                        <a href="/user/login/">Sign In</a>
+                        <span>|</span>
+                        <a href="/user/register/">Register</a>
+                    </div>
+                {% endif %}
+				<div class="user_link fl">
+					<span>|</span>
+					<a href="/user/info/">Account</a>
+					<span>|</span>
+					<a href="/cart/">My Cart</a>
+					<span>|</span>
+					<a href="/cart/place_order">My Order</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="search_bar clearfix">
+		<a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+		<form class="search_con fl" method="get" action="/search/">
+			<input type="text" class="input_text fl" name="q" placeholder="Search Products">
+			<input type="submit" class="input_btn fr" value="Search">
+		</form>
+		<div class="guest_cart fr">
+			<a href="/cart/" class="cart_name fl">My Cart</a>
+			<div class="goods_count fl" id="show_count"></div>
+		</div>
+	</div>
+
+	<div class="navbar_con">
+		<div class="navbar">
+			<h1 class="fl">Categories</h1>
+			<ul class="navlist fl">
+				<li><a href="/">Home</a></li>
+				<li class="interval">|</li>
+				<li><a href="#model01">Movie & TV</a></li>
+				<li class="interval">|</li>
+				<li><a href="#model02">Music</a></li>
+				<li><a href="#model03"></a></li>
+				<li class="interval">|</li>
+				<li><a href="#model04"></a></li>
+				<li><a href="#model05"></a></li>
+				<li class="interval">|</li>
+				<li><a href="#model06"></a></li>
+			</ul>
+		</div>
+	</div>
+
+
+	<div class="list_model">
+		<div class="list_title clearfix">
+			<h3 class="fl" id="model01">Movie & TV</h3>
+			
+			<a href="all1_1_1" class="goods_more fr" id="fruit_more">Recommendation ></a>
+		</div>
+
+		<div class="goods_con clearfix">
+
+			<ul class="goods_list fl">
+                {% for g in type0 %}
+                    <li>
+                        <h4><a href="{{g.id}}">{{ g.gtitle }}</a></h4>
+                        <a href="{{g.id}}"><img src="{{ g.gpic }}"></a>
+                        <div class="prize">¥ {{ g.gprice }}</div>
+                    </li>
+                {%endfor%}
+			</ul>
+		</div>
+	</div>
+
+	<div class="list_model">
+		<div class="list_title clearfix">
+			<h3 class="fl" id="model02">Music</h3>
+			<div class="subtitle fl">
+				<span>|</span>
+                    {% for g in type11 %}
+                        <a href="/{{g.id}}/">{{ g.gtitle | slice:'10' }}...</a>
+                    {% endfor %}
+			</div>
+			<a href="/list2_1_1/" class="goods_more fr">Recommendation ></a>
+		</div>
+
+		<div class="goods_con clearfix">
+		
+			<ul class="goods_list fl">
+				{% for g in type1 %}
+                    <li>
+                        <h4><a href="/{{g.id}}/">{{ g.gtitle }}</a></h4>
+                        <a href="/{{g.id}}/"><img src="{{ g.gpic }}"></a>
+                        <div class="prize">¥ {{ g.gprice }}</div>
+                    </li>
+                {%endfor%}
+			</ul>
+		</div>
+	</div>
+
+	<div class="list_model">
+		<div class="list_title clearfix">
+			<h3 class="fl" id="model03">CDs</h3>
+			<div class="subtitle fl">
+				<span>|</span>
+				<{% for g in type21 %}
+				    <a href="/{{g.id}}/">{{ g.gtitle | slice:'10' }}...</a>
+				{% endfor %}
+			</div>
+			<a href="/list3_1_1/" class="goods_more fr">Recommendation ></a>
+		</div>
+
+		<div class="goods_con clearfix">
+			<ul class="goods_list fl">
+				{% for g in type2 %}
+                    <li>
+                        <h4><a href="/{{g.id}}/">{{ g.gtitle }}</a></h4>
+                        <a href="/{{g.id}}/"><img src="{{ g.gpic }}"></a>
+                        <div class="prize">¥ {{ g.gprice }}</div>
+                    </li>
+                {%endfor%}
+			</ul>
+		</div>
+	</div>
+
+	<div class="list_model">
+		<div class="list_title clearfix">
+			<h3 class="fl" id="model04">Tools</h3>
+			<div class="subtitle fl">
+				<span>|</span>
+				{% for g in type31 %}
+				    <a href="/{{g.id}}/">{{ g.gtitle | slice:'10' }}...</a>
+				{% endfor %}
+			</div>
+			<a href="/list4_1_1/" class="goods_more fr">Recommendation ></a>
+		</div>
+
+		<div class="goods_con clearfix">
+
+			<ul class="goods_list fl">
+			    {% for g in type3 %}
+                    <li>
+                        <h4><a href="/{{g.id}}/">{{ g.gtitle }}</a></h4>
+                        <a href="/{{g.id}}/"><img src="{{ g.gpic }}"></a>
+                        <div class="prize">¥ {{ g.gprice }}</div>
+                    </li>
+                {%endfor%}
+			</ul>
+		</div>
+	</div>
+
+	<div class="list_model">
+		<div class="list_title clearfix">
+			<h3 class="fl" id="model05">Games</h3>
+			<div class="subtitle fl">
+				<span>|</span>
+				{% for g in type41 %}
+				    <a href="/{{g.id}}/">{{ g.gtitle | slice:'10' }}...</a>
+				{% endfor %}
+			</div>
+			<a href="/list5_1_1/" class="goods_more fr">Recommendation ></a>
+		</div>
+
+		<div class="goods_con clearfix">
+
+			<ul class="goods_list fl">
+				{% for g in type4 %}
+                    <li>
+                        <h4><a href="/{{g.id}}/">{{ g.gtitle }}</a></h4>
+                        <a href="/{{g.id}}/"><img src="{{ g.gpic }}"></a>
+                        <div class="prize">¥ {{ g.gprice }}</div>
+                    </li>
+                {%endfor%}
+			</ul>
+		</div>
+	</div>
+
+	<div class="list_model">
+		<div class="list_title clearfix">
+			<h3 class="fl" id="model06">Cell Phone</h3>
+			<div class="subtitle fl">
+				<span>|</span>
+				{% for g in type51 %}
+				    <a href="/{{g.id}}/">{{ g.gtitle | slice:'10' }}...</a>
+				{% endfor %}
+			</div>
+			<a href="/list6_1_1/" class="goods_more fr">Recommendation ></a>
+		</div>
+
+		<div class="goods_con clearfix">
+			
+			<ul class="goods_list fl">
+				{% for g in type5 %}
+                    <li>
+                        <h4><a href="/{{g.id}}/">{{ g.gtitle }}</a></h4>
+                        <a href="/{{g.id}}/"><img src="{{ g.gpic }}"></a>
+                        <div class="prize">¥ {{ g.gprice }}</div>
+                    </li>
+                {%endfor%}
+			</ul>
+		</div>
+	</div>
+	<!--<script type="text/javascript" src="/static/js/slideshow.js"></script>-->
+	<!--<script type="text/javascript">-->
+		<!--BCSlideshow('focuspic');-->
+		<!--var oFruit = document.getElementById('fruit_more');-->
+		<!--var oShownum = document.getElementById('show_count');-->
+
+		<!--var hasorder = localStorage.getItem('order_finish');-->
+
+		<!--if(hasorder)-->
+		<!--{-->
+			<!--oShownum.innerHTML = '2';-->
+		<!--}-->
+
+		<!--oFruit.onclick = function(){-->
+			<!--window.location.href = 'list.html';-->
+		<!--}-->
+	<!--</script>-->
+
+{% endblock body %}
