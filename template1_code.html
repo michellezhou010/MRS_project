@@ -1,0 +1,541 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title></title>
+<style id="system" type="text/css">h1,h2,h3,h4,h5,h6,p,blockquote {    margin: 0;    padding: 0;}body {    font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", Arial, sans-serif;    font-size: 13px;    line-height: 18px;    color: #737373;    margin: 10px 13px 10px 13px;}a {    color: #0069d6;}a:hover {    color: #0050a3;    text-decoration: none;}a img {    border: none;}p {    margin-bottom: 9px;}h1,h2,h3,h4,h5,h6 {    color: #404040;    line-height: 36px;}h1 {    margin-bottom: 18px;    font-size: 30px;}h2 {    font-size: 24px;}h3 {    font-size: 18px;}h4 {    font-size: 16px;}h5 {    font-size: 14px;}h6 {    font-size: 13px;}hr {    margin: 0 0 19px;    border: 0;    border-bottom: 1px solid #ccc;}blockquote {    padding: 13px 13px 21px 15px;    margin-bottom: 18px;    font-family:georgia,serif;    font-style: italic;}blockquote:before {    content:"C";    font-size:40px;    margin-left:-10px;    font-family:georgia,serif;    color:#eee;}blockquote p {    font-size: 14px;    font-weight: 300;    line-height: 18px;    margin-bottom: 0;    font-style: italic;}code, pre {    font-family: Monaco, Andale Mono, Courier New, monospace;}code {    background-color: #fee9cc;    color: rgba(0, 0, 0, 0.75);    padding: 1px 3px;    font-size: 12px;    -webkit-border-radius: 3px;    -moz-border-radius: 3px;    border-radius: 3px;}pre {    display: block;    padding: 14px;    margin: 0 0 18px;    line-height: 16px;    font-size: 11px;    border: 1px solid #d9d9d9;    white-space: pre-wrap;    word-wrap: break-word;}pre code {    background-color: #fff;    color:#737373;    font-size: 11px;    padding: 0;}@media screen and (min-width: 768px) {    body {        width: 748px;        margin:10px auto;    }}</style><style id="custom" type="text/css"></style></head>
+<body marginheight="0"><p>
+</p>
+
+<h2>MRS</h2>
+
+<h2>Abstract</h2>
+Despite the long history of research on recommender systems, current approaches
+still face a number of challenges in practice, e.g. the difficulties in handling new
+items, the high diversity of user interests, and the noisiness and sparsity of observations. Many of such difficulties stem from the lack of expressive power to
+capture the complex relations between items and users. This paper presents a
+new method to tackle this problem, called Collaborative Deep Embedding. In
+this method, a pair of dual networks, one for encoding items and the other for
+users, are jointly trained in a collaborative fashion. Particularly, both networks
+produce embeddings at multiple aligned levels, which, when combined together,
+can accurately predict the matching between items and users. Compared to existing
+methods, the proposed one not only provides greater expressive power to capture
+complex matching relations, but also generalizes better to unseen items or users.
+On multiple real-world datasets, this method outperforms the state of the art.
+
+<h2>Introduction</h2>
+There has been extensive study on recommender systems. Existing methods roughly fall into two
+categories, namely content-based filtering (Pazzani & Billsus, 2007) and collaborative filtering (Mnih
+& Salakhutdinov, 2008; Hu et al., 2008; Yu et al., 2009). The former focuses on extracting relevant
+features from the content, while the latter attempts to exploit the common interest among groups of
+users. In recent efforts, hybrid methods (Agarwal & Chen, 2009; Van den Oord et al., 2013) that
+combine both aspects have also been developed.
+Whereas remarkable progress has been made on this topic, the state of the art remains far from
+satisfactory. The key challenges lie in several aspects. First, there is a large semantic gap between the
+true cause of a matching and what we observe from the data. For example, what usually attracts a book
+consumer is the implied emotion that one has to feel between the lines instead of the occurrences
+of certain words. It is difficult for classical techniques to extract such deep meanings from the
+observations. Second, the cold-start issue, namely making predictions for unseen items or users,
+has not been well addressed. Many collaborative filtering methods rely on the factorization of the
+matching matrix. Such methods implicitly assume that all the users and items are known in advance,
+and thus are difficult to be applied in real-world applications, especially online services.
+
+In this work, we aim to explore deep neural networks for learning the matching relations across two
+domains, with our focus placed on the matching between items and users. Specifically, we propose
+a new framework called Collaborative Deep Embedding, which comprises a pair of dual networks,
+one for encoding items and the other for users. Each network contains multiple embedding layers
+that are aligned with their dual counterparts of the other network. Predictions can then be made by
+coupling these embeddings. Note that unlike a conventional network, the dual networks are trained
+on two streams of data. In this paper, we devise an algorithm that can jointly train both networks
+using dual mini-batches. Compared to previous methods, this method not only narrows the semantic
+gap through a deep modeling architecture, but also provides a natural way to generalize – new items
+and new users can be encoded by the trained networks, just like those present in the training stage.
+On a number of real world tasks, the proposed method yields significant improvement over the current
+state-of-the-art. It is worth stressing that whereas our focus is on the matching between items and
+users, Collaborative Deep Embedding is a generic methodology, which can be readily extended to
+model other kinds of cross-domain relations
+
+Existing methods for recommendation roughly fall into two categories: content-based methods (Pazzani & Billsus, 2007) and collaborative filtering (CF) (Mnih & Salakhutdinov, 2008; Hu et al., 2008;
+Yu et al., 2009). Specifically, content-based methods rely primarily on feature representation of
+the content, in which recommendations are often made based on feature similarity (Slaney et al.,
+2008). Following this, there are also attempts to incorporate additional information, such as meta-data
+of users, to further improve the performance (McFee et al., 2012). Instead, collaborative filtering
+exploits the interaction between users and items. A common approach to CF is to derive latent factors
+of both users and items through matrix factorization, and measure the degree of matching by their
+inner products. Previous study (Ricci et al., 2011) showed that CF methods tend to have higher recommendation accuracy than content-based methods, as they directly target the recommendation task.
+However, practical use of CF is often limited by the cold start problem. It is difficult to recommend
+items without a sufficient amount of use history. Issues like this motivated hybrid methods (Agarwal
+& Chen, 2009; Van den Oord et al., 2013) that combine both aspects of information, which have
+showed encouraging improvement. Our exploration is also along this line.
+To improve the recommendation effect, many kinds of
+side information are introduced to enhance recommendation performance. For instance, social recommendation [20]–
+[22] utilizes social relations or trust relations; content-based
+recommendation [1], [23] employs the content of items or
+users such as the text introduction, video content and so on.
+The most practical approach for recommendation algorithm
+utilizing side information can be summarized as follows. First,
+it builds a feature extraction model for side information (social
+relations, content information), then trains the MF model by
+using these features as the prior of user latent factors or item
+latent factors. Model performance could be improved by these
+reasonable priors. Much of the research focused on exploring
+a better feature extraction model [24], [25]. Meanwhile other
+researches tried to introduce many different kinds of side
+information to push the model performance to the utmost
+limits [1], [26].
+With the considerable advancements in vision, speech and
+natural language processing tasks, deep learning (DL) has
+become a very significant research tool in many fields. With
+the DL algorithm, artificial intelligence has achieved substantial breakthroughs in many areas. In recommendation system,
+many DL based models have been proposed in the last
+several years, which can be classified into two groups, the
+deep learning prior estimate model (DLPE) and the single
+channel recommendation model (SCR). In the DLPEs, DL
+method is employed to estimate the prior of latent factors,
+then the latent factors of users and items are inferred by the
+observed ratings. The DL method includes the convolutional
+neural network (CNN) [25], [26] and the stacked denoising autoencoder (SDAE) [24], [27]. Although DLPEs have
+many advantages over traditional methods, unfortunately, it
+consumes prodigious time and computing resources in the
+inference process. As to SCRs, it learns the key patterns from
+users historical behaviour, then these key patterns are utilized
+to predict the unknown ratings. SCRs can be summarized as
+several primary models: restricted Boltzmann machine (RBM)
+[28], autoencoder (AE) [20], [29]–[31], neural autoregressive
+distribution estimator (NADE) [32], [33], recurrent neural
+network (RNN) [34] and so on. Compared with traditional
+recommendation frameworks, SCRs achieved extraordinary
+performance. Limited by the particular structure of SCRs, it is
+a challenge to merge side information of both users and items
+into the SCRs.
+
+<h2>Goals</h2>
+
+1.1 Goals
+Users come to YouTube for a wide variety of reasons which
+span a spectrum from more to less specific: To watch a
+single video that they found elsewhere (direct navigation), to
+find specific videos around a topic (search and goal-oriented
+browse), or to just be entertained by content that they find
+interesting. Personalized Video Recommendations are one
+way to address this last use case, which we dub unarticulated
+want.
+As such, the goal of the system is to provide personalized
+recommendations that help users find high quality videos rel-
+evant to their interests. In order to keep users entertained
+and engaged, it is imperative that these recommendations
+are updated regularly and reflect a user’s recent activity on
+the site. They are also meant to highlight the broad spec-
+trum of content that is available on the site.
+In its present form, our recommendation system is a top-N
+recommender rather than a predictor [4]. We review how we
+evaluate the success of the recommendation system in sec-
+tion 3 of this paper. An additional primary goal for YouTube
+recommendations is to maintain user privacy and provide
+explicit control over personalized user data that our back-
+end systems expose. We review how we address this goal in
+section 2.5.
+<h2>Background</h2>
+collaborative-filtering
+A significant role is play by a Collaborative Filtering (CF) methods in the recommendation process and because of that Collaborative filtering is most extensively used approach to design recommender system [1, 2]. In this approach recommendation for each active user is received by comparing with the preferences of other users who have rated the product in similar way to the active user [27].
+ Content-Based filtering
+In content-Based filtering recommendations depends on users former choices. Item description and a profile of the user‟s orientation play an important role in Content-based filtering. Content-based
+filtering algorithms try to recommend items based on similarity count [27].
+ Demographic Filtering
+In demographic filtering recommendations is established on a demographic profile of the user. Here recommendation is based on the information provided by the user is considered to be similar according to demographic parameter such as nationality, age, gender etc [27].
+ Hybrid filtering
+The hybrid filtering is a combination of more than one filtering approach [27]. The hybrid filtering approach is introduced to overcome some common problem that are associated with above filtering approaches such as cold start problem, overspecialization problem and sparsity problem. Another motive behind the implementation of hybrid filtering is to improve the accuracy and efficiency of recommendation process.
+<h2>Dataset</h2>
+
+Description     
+This dataset contains product reviews and metadata from Amazon,
+including 142.8 million reviews spanning May 1996 - July 2014.
+
+This dataset includes reviews (ratings, text, helpfulness votes),
+product metadata (descriptions, category information, price, brand, 
+and image features), and links (also viewed/also bought graphs).
+  
+
+During the generation of personalized video recommenda-
+tions we consider a number of data sources. In general, there
+are two broad classes of data to consider: 1) content data,
+such as the raw video streams and video metadata such as
+title, description, etc, and 2) user activity data, which can
+further be divided into explicit and implicit categories. Ex-
+plicit activities include rating a video, favoriting/liking a
+video, or subscribing to an uploader. Implicit activities are
+datum generated as a result of users watching and interact-
+ing with videos, e.g., user started to watch a video and user
+watched a large portion of the video (long watch).
+In all cases, the data that we have at our disposal is quite
+noisy: Video metadata can be non-existent, incomplete, out-
+dated, or simply incorrect; user data only captures a fraction
+of a user’s activity on the site and only indirectly measures
+a user’s engagement and happiness, e.g., the fact that a user
+watched a video in its entirety is not enough to conclude
+that she actually liked it.
+
+Data Format:
+
+<h4>(1) Sample Product Data:</h4>
+Metadata includes descriptions, price, sales-rank, brand info, and co-purchasing links:
+
+metadata (3.1gb) - metadata for 9.4 million products:</br>
+
+asin - ID of the product, e.g. 0000031852
+title - name of the product
+price - price in US dollars (at time of crawl)
+imUrl - url of the product image
+related - related products (also bought, also viewed, bought together, buy after viewing)
+salesRank - sales rank information
+brand - brand name
+categories - list of categories the product belongs to
+
+<pre><code class="lang-java">  
+  
+    {
+      "asin": "0000031852",
+      "title": "Girls Ballet Tutu Zebra Hot Pink",
+      "price": 3.17,
+      "imUrl": "http://ecx.images-amazon.com/images/I/51fAmVkTbyL._SY300_.jpg",
+      "related":
+      {
+        "also_bought": ["B00JHONN1S", "B002BZX8Z6", "B00D2K1M3O", "0000031909", "B00613WDTQ", "B00D0WDS9A", "B00D0GCI8S", "0000031895", "B003AVKOP2", "B003AVEU6G", "B003IEDM9Q", "B002R0FA24", "B00D23MC6W", "B00D2K0PA0", "B00538F5OK", "B00CEV86I6", "B002R0FABA", "B00D10CLVW", "B003AVNY6I", "B002GZGI4E", "B001T9NUFS", "B002R0F7FE", "B00E1YRI4C", "B008UBQZKU", "B00D103F8U", "B007R2RM8W"],
+        "also_viewed": ["B002BZX8Z6", "B00JHONN1S", "B008F0SU0Y", "B00D23MC6W", "B00AFDOPDA", "B00E1YRI4C", "B002GZGI4E", "B003AVKOP2", "B00D9C1WBM", "B00CEV8366", "B00CEUX0D8", "B0079ME3KU", "B00CEUWY8K", "B004FOEEHC", "0000031895", "B00BC4GY9Y", "B003XRKA7A", "B00K18LKX2", "B00EM7KAG6", "B00AMQ17JA", "B00D9C32NI", "B002C3Y6WG", "B00JLL4L5Y", "B003AVNY6I", "B008UBQZKU", "B00D0WDS9A", "B00613WDTQ", "B00538F5OK", "B005C4Y4F6", "B004LHZ1NY", "B00CPHX76U", "B00CEUWUZC", "B00IJVASUE", "B00GOR07RE", "B00J2GTM0W", "B00JHNSNSM", "B003IEDM9Q", "B00CYBU84G", "B008VV8NSQ", "B00CYBULSO", "B00I2UHSZA", "B005F50FXC", "B007LCQI3S", "B00DP68AVW", "B009RXWNSI", "B003AVEU6G", "B00HSOJB9M", "B00EHAGZNA", "B0046W9T8C", "B00E79VW6Q", "B00D10CLVW", "B00B0AVO54", "B00E95LC8Q", "B00GOR92SO", "B007ZN5Y56", "B00AL2569W", "B00B608000", "B008F0SMUC", "B00BFXLZ8M"],
+        "bought_together": ["B002BZX8Z6"]
+      },
+      "salesRank": {"Toys & Games": 211836},
+      "brand": "Coxlures",
+      "categories": [["Sports & Outdoors", "Other Sports", "Dance"]]
+    }
+
+ </code></pre>
+
+ <h4>(2) Sample Review Data(Item for one reviewer):</h4>
+ The above file contains some duplicate reviews, mainly due to 
+ near-identical products whose reviews Amazon merges, e.g. VHS and DVD 
+ versions of the same movie. These duplicates have been removed in the files 
+ below:</br>
+
+reviewerID - ID of the reviewer, e.g. A2SUAM1J3GNN3B
+asin - ID of the product, e.g. 0000013714
+reviewerName - name of the reviewer
+helpful - helpfulness rating of the review, e.g. 2/3
+reviewText - text of the review
+overall - rating of the product
+summary - summary of the review
+unixReviewTime - time of the review (unix time)
+reviewTime - time of the review (raw)
+ <pre><code class="lang-java">  
+   
+    {
+      "reviewerID": "A2SUAM1J3GNN3B",
+      "asin": "0000013714",
+      "reviewerName": "J. McDonald",
+      "helpful": [2, 3],
+      "reviewText": "I bought this for my husband who plays the piano.  He is having a wonderful time playing these old hymns.  The music  is at times hard to read because we think the book was published for singing from more than playing from.  Great purchase though!",
+      "overall": 5.0,
+      "summary": "Heavenly Highway Hymns",
+      "unixReviewTime": 1252800000,
+      "reviewTime": "09 13, 2009"
+    }
+  </code></pre>
+
+Data Prepration
+
+
+
+
+<h2>Data Processing</h2>
+
+Data pre-processing: In the original database file extracted, not all the information
+are valid for web usage data mining, we only need entries that contain relevant
+information. The original file is usually made up of text files that contains
+large volume of information concerning queries made to the web server in which
+in most instance contains irrelevant, incomplete and misleading information for
+mining purpose [30,11]. Resul and Ibrahim [26], described data preprocessing as
+the cleansing, formatting and grouping of web log files into meaningful session
+for the sole aim of utilizing it for web usage mining.
+Data cleansing: Data cleansing is the stage in which irrelevant/noisy entries are
+eliminated from the log file [18]. For this work the following operations were carried
+out: (i) Removal of entries with ‘‘Error’’ or ‘‘Failure’’ status. (ii) Removal of
+requests executed by automated programs such as some access records that are
+automatically generated by the search engine agent from access log file and proxies.
+(iii) Identification and removal of request for picture files associated with
+request for a page and request include Java scripts (.js), and style sheet file (iv)
+Removal of entries with unsuccessful HTTP status code, etc.
+Data mart development: Two crown corporation [29], explained that data mart
+is a logical subset of data warehouse. If the data warehouse DBMS can support
+more resources, that will be required of the data mining operation, otherwise a
+separate data mining database will be required. Since the raw log file is usually
+not a good starting point for data mining operation, the development of a data
+mart of log data is required for the data mining operation. In this work a separate
+data mart of users’ RSS address URL was developed using relational database
+Management software MySQL [20,19].
+
+4.2 Mining rich product descriptions
+The success of the recommendation approach developed in this work depends critically on
+our ability to translate user-generated reviews into useful product cases; in the sense that
+they are rich enough, in terms of their features, to form the basis of recommendation.
+4.2.1 Feature histograms
+As a starting point consider the feature histograms in Fig. 4 for the cases extracted for each
+product type and showing the number of product cases of different sizes (that is, different
+numbers of features) that were produced. Generally speaking we can see that our feature
+mining approach is extracting rich product cases, many of which contain reasonably large
+numbers of features. For example, we can see that Laptop cases (Fig. 4c) contain a wide
+range of case sizes, from small cases with very limited features sets of less than 10 to
+cases with as many as 70 features; the majority of cases contain somewhere between 15
+and 30 features. In contrast Phones (Fig. 4d) have a much narrower feature distribution;
+most have 5-15 features while very few have more than 20 features, indicating that users
+provide opinions on a narrow range of features in their reviews of phones compared to
+laptops.
+4.2.2 Product similarity
+The last two columns in Table 1 show the mean and standard deviation of the number of
+features that are extracted across the 6 product domains. It should be clear that we can expect
+to generate reasonably feature-rich cases from our review mining approach as 10-30 features
+are extracted per product case on average. However, this is of limited use if the variance
+in similarity between products in each category is low. Figure 5 shows histograms for the
+similarity values between all pairs of products for each of the 6 Amazon domains. Once
+again the results bode well because they show a wide range of possible similarity values,
+rather than a narrow range of similarity which may suggest limitations in the expressiveness
+of the extracted product representations.
+4.2.3 Sentiment Heatmaps
+It is also interesting to look at the different types of sentiment expressed for different features
+in the product categories. For example, Fig. 6 shows the sentiment heatmap for the
+Laptops product category. Rows correspond to product cases and columns to their features.
+<h2>Setup</h2>
+
+<h2>Reference</h2>
+Collaborative filtering (CF), as a kind of personalized recommendation technique, has been widely used in many domains
+[1–3,12,13]. However, collaborative filtering also suffers from a
+few of issues, for instance, cold start problem, data sparsity, scalability and so on. These problems seriously reduce the user experience. This paper focuses on how to improve the prediction
+accuracy. Collaborative filtering recommends items to users
+according to their preferences. Therefore, a history database of
+users’ preference must be available. However, the database is always very sparse, that is, user only rates a small number of items.
+Up to now, there are many researchers who have focused on the
+prediction accuracy and proposed some solutions.
+To improve the accuracy, many researchers have proposed
+some new similarity measures. Ahn [14] proposed a new similarity
+for collaborative filtering that is called PIP (Proximity-Impact-Popularity). This paper analyzed the disadvantages of Pearson correlation coefficient [10] and cosine similarity [11]. This new similarity
+considered three aspects: proximity, impact and popularity of the
+user ratings. But, this similarity considers only the local information of the ratings and does not consider the global preference of
+user ratings. Traditional Pearson correlation coefficient does not
+consider the size of the set of common users. To solve this problem,
+weighted Pearson correlation coefficient has been proposed [16]. It
+considers the idea of capturing the confidence which can be placed
+on the neighbor. The confidence will increase with the number of
+common rated items. Jamali and Ester [15] introduced a similarity
+measure based on the sigmoid function. This approach can weaken
+the similarity of small common items among users. The adjusted
+cosine similarity measure [14] was proposed to make up the shortage of traditional cosine similarity, however, it did not consider the
+preference of user ratings.
+Bobadilla et al. [18] proposed a new metric which combined the
+Jaccard measure [17] and mean squared difference [6]. It assumed
+that these two measures could complement each other. Another
+new metric, which is called MJD (Mean–Jaccard–Difference), was
+proposed to solve the cold user problem. This metric includes three
+steps: first the selection of similarity measures, the new metric has
+six similarity measures after this step. Then, the weights of each
+similarity measure will be evaluated by neural network learning.
+Finally, the prediction can be obtained according to the new metric. Recently, a singularity based similarity measure (SM) [19]
+was also presented. This measure hypothesized that the results obtained by applying traditional similarity measures could be improved by taking contextual information. This paper first
+categorized the rating as positive and non-positive. Then, it computed the singularity values of each user and each item. It replaced
+the similarity with singularity value. The experiments verified the
+effectiveness of this approach. Moreover, Bobadilla et al. [20] introduced a significance based similarity measure. This measure first
+calculates three kinds of significances, which is the significance
+of an item, the significance of a user to recommend to other users
+and the significance of an item for a user. Then the traditional Pearson correlation coefficient or cosine similarity will be used to calculate the similarities among users according to the significance.
+Data smoothing technique is another most used method to improve the recommend performance in collaborative filtering. Various sparsity measures [21] were used to enhance accuracy of
+collaborative filtering. These sparsity measures were computed
+based on local and global similarities. Then, an estimating parameter scheme for weighting the various sparsity measures was proposed. The experimental results demonstrated that the proposed
+estimate parameter outperforms the schemes for which the
+parameter was kept constant on accuracy of prediction ratings.
+Ma et al. [22] proposed a partial missing data prediction algorithm,
+in which the information of both users and items was taken into
+account. In this algorithm, similarity threshold for users and items
+was set respectively and the missing data will be predicted if and
+only if, the intersection of the neighbors of user and the neighbors
+of item is not empty. The iterative prediction method [23] clusters
+the user and item respectively by using spectral clustering algorithm. Then, the iterative prediction technique is used to convert
+user-item sparse matrix to dense one based on the explicit ratings.
+Beyond that, dimensionality reduction technique, such as principle component analysis (PCA) [24] and singular value decomposition (SVD) [25], is commonly used to alleviate the problem. Gong
+et al. [26] combined the SVD and item-based recommender in CF. It
+utilized the results of SVD to fill the missing ratings and then used
+the traditional item-based method to recommend. This combination method can increase the accuracy of system. Moreover, hybrid
+methods are also proposed. Szwabe et al. [27] investigated a hybrid
+recommendation method which was based on two-stage data processing–dealing with content features describing items and handing user behavioral data. This hybrid method combined random
+indexing (RI) technique and SVD to pre-process the content features. The experiments improved the recommendation accuracy
+without increasing the computational complexity. Probabilistic
+matrix factorization [28] is also combined in social recommendation to solve data sparsity.
+Moreover, cluster-based smoothing method [29], support vector machine (SVM) [30], BP neural networks [31] and zero-sum reward and punishment mechanism [32] are also applied to smooth
+the missing ratings for the solution of accuracy in collaborative
+filtering
+
+
+
+<h2>Algorithm</h2>
+
+<h2>EVALUATION</h2>
+3.
+In our production system we use live evaluation via A/B
+testing [5] as the main method for evaluating the perfor-
+mance of the recommendation system. In this method, live
+traffic is diverted into distinct groups where one group acts
+as the control or baseline and the other group is exposed to
+a new feature, data, or UI. The two groups are then com-
+pared against one another over a set of predefined metrics
+and possibly swapped for another period of time to elimi-
+nate other factors. The advantage of this approach is that
+evaluation takes place in the context of the actual website
+UI. It’s also possible to run multiple experiments in parallel
+and get quick feedback on all of them. The downsides are
+that not all experiments have reasonable controls that can
+be used for comparison, the groups of users must have suf-
+ficient traffic to achieve statistically significant results in a
+timely manner and evaluation of subjective goals is limited
+to the interpretation of a relatively small set of pre-defined
+metrics.
+To evaluate recommendation quality we use a combina-
+tion of different metrics. The primary metrics we consider
+include click through rate (CTR), long CTR (only counting
+clicks that led to watches of a substantial fraction of the
+video), session length, time until first long watch, and rec-
+ommendation coverage (the fraction of logged in users with
+recommendations). We use these metrics to both track per-
+formance of the system at an ongoing basis as well as for
+evaluating system changes on live traffic.
+4. RESULTS
+The recommendations feature has been part of the YouTube
+homepage for more than a year and has been very successful
+in context of our stated goals. For example, recommenda-
+tions account for about 60% of all video clicks from the home
+page.
+Comparing the performance of recommendations with other
+modules on the homepage suffers from presentation bias
+(recommendations are placed at the top by default). To
+adjust for this, we look at CTR metrics from the “browse”
+pages and compare recommendations to other algorithmi-
+
+cally generated video sets: a) Most Viewed - Videos that
+have received the most number of views in a day, b) Top
+Favorited - Videos that the viewers have added to their col-
+lection of favorites and c) Top Rated - Videos receiving most
+like ratings in a day.
+We measured CTR for these sections over a period of 21
+days. Overall we find that co-visitation based recommen-
+dation performs at 207% of the baseline Most Viewed page
+when averaged over the entire period, while Top Favorited
+
+
+
+<h2>Demo</h2>
+
+<h3>system design</h3>
+SYSTEM DESIGN
+The overall design of the recommendation system is guided
+by the goals and challenges outlined above: We want rec-
+ommendations to be reasonably recent and fresh, as well as
+diverse and relevant to the user’s recent actions. In addi-
+tion, it’s important that users understand why a video was
+recommended to them.
+The set of recommended videos videos is generated by
+using a user’s personal activity (watched, favorited, liked
+videos) as seeds and expanding the set of videos by travers-
+ing a co-visitation based graph of videos. The set of videos
+is then ranked using a variety of signals for relevance and
+diversity.
+From an engineering perspective, we want individual com-
+ponents of the system to be decoupled from each other, al-
+lowing them to be understood and debugged in isolation.
+Given that our system is part of the larger YouTube ecosys-
+tem, recommendations also needs to be resilient to failure
+and degrade gracefully in case of partial failures. As a con-
+sequence, we strive to minimize complexity in the overall
+system.
+
+<h2>Implementation</h2>
+
+2.5 User Interface
+Presentation of recommendations is an important part of
+the overall user experience. Figure 1 shows how recommen-
+dations are currently presented on YouTube’s home page.
+There are a few features worth noting: First, all recom-
+mended videos are displayed with a thumbnail and their
+(possibly truncated) title, as well as information about video
+age and popularity. This is similar to other sections on the
+homepage and helps users decide quickly whether they are
+interested in a video. Furthermore, we add an explanation
+with a link to the seed video which triggered the recom-
+mendation. Last, we give users control over where and how
+many recommendations they want to see on the homepage.
+As mentioned in section 2.4, we compute a ranked list of
+recommendations but only display a subset at serving time.
+This enables us to provide new and previously unseen rec-
+ommendations every time the user comes back to the site,
+even if the underlying recommendations have not been re-
+computed.
+2.6 System Implementation
+We choose a batch-oriented pre-computation approach rather
+than on-demand calculation of recommendations. This has
+the advantages of allowing the recommendation generation
+stage access to large amounts of data with ample amounts of
+CPU resources while at the same time allowing the serving
+of the pre-generated recommendations to be extremely low
+latency. The most significant downside of this approach is
+the delay between generating and serving a particular rec-
+ommendation data set. We mitigate this by pipelining the
+recommendation generation, updating the data sets several
+times per day.
+The actual implementation of YouTube’s recommendation
+system can be divided into three main parts: 1) data collec-
+tion, 2) recommendation generation and 3) recommendation
+serving.
+The raw data signals previously mentioned in section 2.1
+are initially deposited into YouTube’s logs. These logs are
+processed, signals extracted, and then stored on a per user
+basis in a Bigtable [2]. We currently handle millions of users
+and tens of billions of activity events with a total footprint
+of several terabytes of data.
+Recommendations are generated through a series of MapRe-
+duces computations [3] that walk through the user/video
+graph to accumulate and score recommendations as described
+in section 2.
+The generated data set sizes are relatively small (on the
+order of Gigabytes) and can be easily served by simpli-
+fied read-only Bigtable servers to YouTube’s webservers; the
+time to complete a recommendation request is mostly dom-
+inated by network transit time.
+
+
+
+
+<p>
+dgfvdfnkgnkdf
+</p>
+<p>fdsfsdvsfvg
+
+</p>
+<h2>Head2</h2>
+<ul>
+<li>teset<code>highlight</code>功能<ul>
+
+</ul>
+</li>
+<li>lllllll<code>nmnmnmnmn</code>，kdksjcks</li>
+
+</ul>
+
+</p>
+
+
+</p>
+<ul>
+<li><a href="http://mouapp.com/">mou</a> </li>
+
+</ul>
+<h2>Code part</h2>
+<pre><code class="lang-java">  var ihubo = {
+    nickName  : 
+    site : "http://jser.me"
+  }</code></pre>
+
+</body></html>
+
